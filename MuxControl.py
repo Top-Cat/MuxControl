@@ -6,7 +6,7 @@
 #
 # Created:
 # Copyright:   (c) Robert Walker 2013
-# Licence:
+# Licence:     GPLv3
 #-------------------------------------------------------------------------------
 
 import sys
@@ -47,16 +47,7 @@ from time import sleep
 
 from math import floor
 
-
-app = wx.App(False)
-
-
-panelList = []
-
-settings = et.parse('settings.xml')
-
 logging.basicConfig(filename = 'MuxControl.log', level = logging.DEBUG)
-logging.info('Starting up')
 
 
 # IDs
@@ -1129,7 +1120,6 @@ class TarantulaPanel(DevPanel):
     def __init__(self, parent, *args, **kwargs):
         DevPanel.__init__(self, parent, dev = devList.findDev('tarantula'),
                                                             *args, **kwargs)
-        self.dev = dev
         textboxSize = (200, 27)
         sizer = wx.GridBagSizer(hgap = 10, vgap = 10)
         currentShow = wx.StaticText(self, label = 'Currently playing')
@@ -1307,52 +1297,68 @@ def EVT_LINK(win, EVT_ID, func):
     win.Connect(-1, -1, EVT_ID, func)
 
 
-devTypeDict = {'Transmission Light': trl.TransmissionLight,
-                'Mux': yvp.Mux, 'Videohub': vh.Videohub,
-                'Hedco': None, 'Tarantula': tara.Tarantula,
-                'Tally': yvp.Tally}
+def main():
+    
+    global devList, settings
+    
+    app = wx.App(False)
 
-devList = DevList()
+    panelList = []
 
-for dev in settings.find('devices').findall('*'):
-    enabled = dev.attrib['enabled']
-    dev = devTypeDict[dev.find('type').text](dev.find('host').text,
-                                            dev.find('port').text)
-    devList.append(dev)
-    if enabled == 'True':
-        dev.setEnabled(True)
-        try:
-            dev.update()
-            if dev.getName() == 'mux':
-                print 'Kicked'
-                dev.kick()
-        except AttributeError:
+    settings = et.parse('settings.xml')
+    
+    logging.info('Starting up')
+
+    devTypeDict = {'Transmission Light': trl.TransmissionLight,
+                    'Mux': yvp.Mux, 'Videohub': vh.Videohub,
+                    'Hedco': None, 'Tarantula': tara.Tarantula,
+                    'Tally': yvp.Tally}
+                    
+    devList = DevList()
+
+    for dev in settings.find('devices').findall('*'):
+        enabled = dev.attrib['enabled']
+        dev = devTypeDict[dev.find('type').text](dev.find('host').text,
+                                                dev.find('port').text)
+        devList.append(dev)
+        if enabled == 'True':
+            dev.setEnabled(True)
             try:
-                dev.open()
-                dev.close()
+                dev.update()
+                if dev.getName() == 'mux':
+                    print 'Kicked'
+                    dev.kick()
+            except AttributeError:
+                try:
+                    dev.open()
+                    dev.close()
+                except socket.error:
+                    lostDev(dev.getName())
             except socket.error:
                 lostDev(dev.getName())
-        except socket.error:
-            lostDev(dev.getName())
-        logging.info('{} connected'.format(dev.getName()))
-    else:
-        dev.setEnabled(False)
+            logging.info('{} connected'.format(dev.getName()))
+        else:
+            dev.setEnabled(False)
 
 
-colourDict = {1: (255, 0, 0), 2: (255, 85, 0), 3:(255, 170, 0),
-            4:(255, 255, 0), 5:(170, 255, 0), 6:(85, 255, 0),
-            7:(0, 255, 0), 8:(0, 255, 85), 9:(0, 255, 170),
-            10:(0, 255, 255), 11:(0, 170, 255), 12:(0, 85, 255),
-            13:(0, 0, 255), 14:(85, 0, 255), 15:(170, 0, 255),
-            16:(255, 0, 255), 17:(255, 0, 170), 18:(255, 0, 85)}
+    colourDict = {1: (255, 0, 0), 2: (255, 85, 0), 3:(255, 170, 0),
+                4:(255, 255, 0), 5:(170, 255, 0), 6:(85, 255, 0),
+                7:(0, 255, 0), 8:(0, 255, 85), 9:(0, 255, 170),
+                10:(0, 255, 255), 11:(0, 170, 255), 12:(0, 85, 255),
+                13:(0, 0, 255), 14:(85, 0, 255), 15:(170, 0, 255),
+                16:(255, 0, 255), 17:(255, 0, 170), 18:(255, 0, 85)}
 
-window = MainWindow(None)
-app.MainLoop()
+    window = MainWindow(None)
+    app.MainLoop()
 
-for dev in devList:
-    dev.close()
+    for dev in devList:
+        dev.close()
 
-del devList
+    del devList
 
-logging.info('Exiting')
-exit()
+    logging.info('Exiting')
+    exit()
+
+
+if __name__ == '__main__':
+    main()
