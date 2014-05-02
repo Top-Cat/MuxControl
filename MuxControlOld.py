@@ -1265,7 +1265,7 @@ class UpdateThread(Thread):
                                 dev.update()
                                 wx.PostEvent(self.getPanel('Mux Control'),
                                                                 EVT_UPDATE())
-                            logging.info('{} updated'.format(dev.getName()))
+                            logging.debug('{} updated'.format(dev.getName()))
                         except (socket.timeout):
                             lostDev(dev.getName())
             except (wx.PyDeadObjectError, NameError):
