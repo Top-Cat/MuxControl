@@ -51,17 +51,17 @@ class WizPageDeviceSetup(wxx.WizardPage):
     
     def onAdd(self, e):
         
-        self.sizer.Insert(-1, WizPageDevice(self))
+        self.sizer.Insert(self.sizer.getIndex(e.GetEventObject()) - 1, WizPageDevice(self))
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
     
     def __init__(self, *args, **kwargs):
         wxx.WizardPage.__init__(self, *args, **kwargs)
         devList = []
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer = wxx.BoxSizer(wx.VERTICAL)
         text = wx.StaticText(self, label = 'Add the required devices')
         add = wx.Button(self, label = 'Add device')
-        self.sizer.Add(add)
+        self.sizer.AddMany([(text), (add)])
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
         self.sizer.Fit(self)
@@ -75,7 +75,7 @@ class WizPageWelcome(wxx.WizardPage):
         text = wx.StaticText(self, label = 'Welcome!\r\nLooks like you haven\'t run this before')
 
 
-class FirstTime(wxx.Wizard):
+class WizFirstTime(wxx.Wizard):
     
     def __init__(self, *args, **kwargs):
         wxx.Wizard.__init__(self, *args, **kwargs)
@@ -87,7 +87,7 @@ class FirstTime(wxx.Wizard):
 
 def main():
     
-    availableDev = ['hub', 'mux', 'tarantula', 'txlight', 'tally'
+    availableDev = ['hub', 'mux', 'tarantula', 'txlight', 'tally']
 
     app = wx.App(False)
     
@@ -98,8 +98,14 @@ def main():
         logging.info('Found settings')
     except IOError:
         logging.info('No settings found, running setup wizard')
-        FirstTime(None)
+        WizFirstTime(None)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    except Exception as e:
+        logging.error(e)
+    logging.info('Exiting')

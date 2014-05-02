@@ -12,6 +12,12 @@
 import wx
 import wx.wizard as wiz
 
+class Sizer(wx.Sizer):
+    
+    def getIndex(self, item):
+        
+        pass
+
 class Notebook(wx.Notebook):
 
     def __getitem__(self, index):
@@ -75,3 +81,7 @@ class Wizard(wiz.Wizard):
     def onCancel(self, evt):
 
         page = evt.GetPage()
+
+class BoxSizer(wx.BoxSizer, Sizer):
+    
+    pass
