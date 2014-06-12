@@ -51,7 +51,7 @@ class WizPageDeviceSetup(wxx.WizardPage):
     
     def onAdd(self, e):
         
-        self.sizer.Insert(self.sizer.getIndex(e.GetEventObject()) - 1, WizPageDevice(self))
+        self.sizer.Insert(-1, WizPageDevice(self))
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
     
