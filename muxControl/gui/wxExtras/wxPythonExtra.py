@@ -82,6 +82,11 @@ class Wizard(wiz.Wizard):
 
         page = evt.GetPage()
 
+<<<<<<< HEAD:wxPythonExtra.py
 class BoxSizer(wx.BoxSizer, Sizer):
     
     pass
+=======
+    def run(self):
+        self.RunWizard(self.pages[0])
+>>>>>>> 04d16b6ed88fd9fb51bb311977c2523b233df247:muxControl/gui/wxExtras/wxPythonExtra.py
